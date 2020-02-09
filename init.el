@@ -21,11 +21,13 @@
 	(define-key python-mode-map "(" 'electric-pair)
 	(define-key python-mode-map "[" 'electric-pair)
 	(define-key python-mode-map "{" 'electric-pair)))
-;;;;Org mode configuration
+
+
 ;; Enable Org mode
 (require 'org)
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c c") 'org-capture)
 (setq org-log-done t)
 ;; Make Org mode work with files ending in .org
 ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
@@ -46,6 +48,10 @@
  '(custom-safe-themes
    (quote
     ("c616e584f7268aa3b63d08045a912b50863a34e7ea83e35fcab8537b75741956" "3eb93cd9a0da0f3e86b5d932ac0e3b5f0f50de7a0b805d4eb1f67782e9eb67a4" "b59d7adea7873d58160d368d42828e7ac670340f11f36f67fa8071dbf957236a" default)))
+ '(org-agenda-files
+   (quote
+    ("~/org/test.org" "/Users/ketanagrawal/org/test.org" "/Users/ketanagrawal/org/test2.org")))
+ '(org-default-notes-file (concat org-directory "/capture.org"))
  '(package-selected-packages
    (quote
     (magit material-theme airline-themes evil-commentary spaceline))))
