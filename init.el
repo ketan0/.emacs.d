@@ -4,11 +4,26 @@
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
+
 (require 'package)
 ;; Any add to list for package-archives (to add marmalade or melpa) goes here
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("org" . "http://orgmode.org/elpa/")
+			 ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")))
+(setq package-enable-at-startup nil)
+(package-initialize)
+
+;; USE-PACKAGE CONFIG
+;; automatically install use-package if on a fresh system
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile
+  ;; Following line is not needed if use-package.el is in ~/.emacs.d
+  (add-to-list 'load-path "/Users/ketanagrawal/.emacs.d/elpa/")
+  (require 'use-package))
+
 ;; Disable the splash screen (to enable it agin, replace the t with 0)
 (setq inhibit-splash-screen t)
 
@@ -23,6 +38,9 @@
 	(define-key python-mode-map "{" 'electric-pair)))
 
 
+
+(load-theme 'material t)
+
 ;; Org mode settings
 (require 'org)
 (global-set-key (kbd "C-c l") 'org-store-link)
@@ -32,10 +50,6 @@
 ;; Make Org mode work with files ending in .org
 ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 ;; The above is the default in recent emacsen
-
-(setq package-enable-at-startup nil)
-(package-initialize)
-(load-theme 'material t)
 
 (when (version<= "26.0.50" emacs-version )
   (global-display-line-numbers-mode))
@@ -54,7 +68,7 @@
  '(org-default-notes-file (concat org-directory "/capture.org"))
  '(package-selected-packages
    (quote
-    (magit material-theme airline-themes evil-commentary spaceline))))
+    (use-package evil-surround magit material-theme airline-themes evil-commentary spaceline))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -65,10 +79,19 @@
 (load-theme 'airline-kolor)
 
 ;; EVIL SETTINGS
+;;require
 (require 'evil)
+(require 'evil-commentary)
 (require 'evil-leader)
-(global-evil-leader-mode)
+(require 'evil-surround)
+;;intialize
+(global-evil-leader-mode t)
 (evil-mode t)
+(evil-commentary-mode t)
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 
 (evil-leader/set-leader "<SPC>")
 (evil-leader/set-key
@@ -76,8 +99,12 @@
   "b" 'switch-to-buffer
   "w" 'save-buffer)
 
+;; Shortcut to edit init.el
 (defun er-find-user-init-file ()
   "Edit the `user-init-file', in another window."
   (interactive)
   (find-file-other-window user-init-file))
 (global-set-key (kbd "C-c I") #'er-find-user-init-file)
+
+;;MAGIT SETTINGS
+(global-set-key (kbd "C-x g") 'magit-status)
