@@ -64,7 +64,6 @@
   :config
   (load-theme 'airline-dark))
 
-;; Org mode settings
 (use-package org
   :ensure t
   :config
@@ -72,35 +71,36 @@
   (setq org-agenda-files (quote ("~/org/todo.org")))
   (setq org-catch-invisible-edits (quote show-and-error))
   (setq org-default-notes-file (concat org-directory "/capture.org"))
+;; Make Org mode work with files ending in .org
+;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+;; The above is the default in recent emacsen
   (global-set-key (kbd "C-c l") 'org-store-link)
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c c") 'org-capture))
 
-;; Make Org mode work with files ending in .org
-;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-;; The above is the default in recent emacsen
-;; EVIL SETTINGS
-;; load evil
+
 (use-package evil
   :ensure t
-  :config ;; tweak evil after loading it
+  :init
+  (setq evil-want-C-i-jump nil)
+  :config 
   (evil-mode t))
 
 (unless (display-graphic-p)
-      (use-package evil-terminal-cursor-changer
-        :ensure t
-        :init
-        (setq evil-motion-state-cursor 'box)  ; █
-        (setq evil-visual-state-cursor 'box)  ; █
-        (setq evil-normal-state-cursor 'box)  ; █
-        (setq evil-insert-state-cursor 'bar)  ; ⎸
-        (setq evil-emacs-state-cursor  'hbar) ; _
-        :config
-        (etcc-on)))
+  (use-package evil-terminal-cursor-changer
+    :ensure t
+    :init
+    (setq evil-motion-state-cursor 'box)  ; █
+    (setq evil-visual-state-cursor 'box)  ; █
+    (setq evil-normal-state-cursor 'box)  ; █
+    (setq evil-insert-state-cursor 'bar)  ; ⎸
+    (setq evil-emacs-state-cursor  'hbar) ; _
+    :config
+    (etcc-on)))
 
 (use-package evil-commentary
-  :ensure t ;; install the evil package if not installed
-  :config ;; tweak evil after loading it
+  :ensure t 
+  :config 
   (evil-commentary-mode t))
 
 (use-package evil-leader
@@ -138,6 +138,8 @@
   (find-file-other-window user-init-file))
 (global-set-key (kbd "C-c I") #'er-find-user-init-file)
 
-;;MAGIT SETTINGS
-(global-set-key (kbd "C-x g") 'magit-status)
+(use-package magit
+  :ensure t
+  :config
+  (global-set-key (kbd "C-x g") 'magit-status))
 
