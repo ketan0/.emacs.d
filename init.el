@@ -1,5 +1,3 @@
-;; -*- mode: elisp -*-
-
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
@@ -41,9 +39,6 @@
  '(custom-safe-themes
    (quote
     ("c616e584f7268aa3b63d08045a912b50863a34e7ea83e35fcab8537b75741956" "3eb93cd9a0da0f3e86b5d932ac0e3b5f0f50de7a0b805d4eb1f67782e9eb67a4" "b59d7adea7873d58160d368d42828e7ac670340f11f36f67fa8071dbf957236a" default)))
- '(org-agenda-files (quote ("~/org/todo.org")))
- '(org-catch-invisible-edits (quote show-and-error))
- '(org-default-notes-file (concat org-directory "/capture.org"))
  '(package-selected-packages
    (quote
     (evil-org use-package evil-surround magit material-theme airline-themes evil-commentary spaceline))))
@@ -74,6 +69,9 @@
   :ensure t
   :config
   (setq org-log-done t)
+  (setq org-agenda-files (quote ("~/org/todo.org")))
+  (setq org-catch-invisible-edits (quote show-and-error))
+  (setq org-default-notes-file (concat org-directory "/capture.org"))
   (global-set-key (kbd "C-c l") 'org-store-link)
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c c") 'org-capture))
@@ -86,35 +84,40 @@
 (use-package evil
   :ensure t
   :config ;; tweak evil after loading it
-  (evil-mode))
+  (evil-mode t))
 
-(use-package  
 (unless (display-graphic-p)
-          (require 'evil-terminal-cursor-changer)
-          (evil-terminal-cursor-changer-activate) ; or (etcc-on)
-          )
+      (use-package evil-terminal-cursor-changer
+        :ensure t
+        :init
+        (setq evil-motion-state-cursor 'box)  ; █
+        (setq evil-visual-state-cursor 'box)  ; █
+        (setq evil-normal-state-cursor 'box)  ; █
+        (setq evil-insert-state-cursor 'bar)  ; ⎸
+        (setq evil-emacs-state-cursor  'hbar) ; _
+        :config
+        (etcc-on)))
 
 (use-package evil-commentary
   :ensure t ;; install the evil package if not installed
   :config ;; tweak evil after loading it
-  (evil-commentary-mode 1))
+  (evil-commentary-mode t))
 
 (use-package evil-leader
   :ensure t
-  :init
+  :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
   "f" 'find-file
   "b" 'switch-to-buffer
   "w" 'save-buffer)
-  :config
-  (global-evil-leader-mode 1))
+  (global-evil-leader-mode t))
 
 ;;intialize
 (use-package evil-surround
   :ensure t
   :config
-  (global-evil-surround-mode 1))
+  (global-evil-surround-mode t))
 
 (use-package evil-org
   :ensure t
