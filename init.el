@@ -23,8 +23,10 @@
   (require 'use-package))
 (setq use-package-always-ensure t)
 
+;;GENERAL EMACS SETTINGS
 ;; Disable the splash screen (to enable it again, replace the t with 0)
 (setq inhibit-splash-screen t)
+(electric-pair-mode t)
 (menu-bar-mode -1)
 
 
@@ -82,8 +84,9 @@
 (use-package evil
   :ensure t
   :init
-  (setq evil-want-C-i-jump nil)
+  (setq evil-want-C-i-jump nil) ;cuz C-i and TAB are same in terminal
   :config 
+  (define-key evil-motion-state-map (kbd "C-c i") 'evil-jump-forward)
   (evil-mode t))
 
 (unless (display-graphic-p)
