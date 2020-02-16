@@ -2,7 +2,6 @@
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
-
 (require 'package)
 ;; Any add to list for package-archives (to add marmalade or melpa) goes here
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -28,7 +27,18 @@
 (setq inhibit-splash-screen t)
 (electric-pair-mode t)
 (menu-bar-mode -1)
+(tool-bar-mode -1)
+(toggle-scroll-bar -1)
+(global-visual-line-mode 1)
+(set-frame-font "Fira Code 14" nil t)
+(mac-auto-operator-composition-mode)
 
+;; Shortcut to edit init.el
+(defun er-find-user-init-file ()
+  "Edit the `user-init-file', in another window."
+  (interactive)
+  (find-file-other-window user-init-file))
+(global-set-key (kbd "C-c I") #'er-find-user-init-file)
 
 (when (version<= "26.0.50" emacs-version )
   (global-display-line-numbers-mode))
@@ -43,7 +53,7 @@
     ("c616e584f7268aa3b63d08045a912b50863a34e7ea83e35fcab8537b75741956" "3eb93cd9a0da0f3e86b5d932ac0e3b5f0f50de7a0b805d4eb1f67782e9eb67a4" "b59d7adea7873d58160d368d42828e7ac670340f11f36f67fa8071dbf957236a" default)))
  '(package-selected-packages
    (quote
-    (evil-org use-package evil-surround magit material-theme airline-themes evil-commentary spaceline))))
+    (auctex org-journal evil-org use-package evil-surround magit material-theme airline-themes evil-commentary spaceline))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -66,6 +76,12 @@
   :config
   (load-theme 'airline-dark))
 
+(use-package tex
+  :defer t
+  :ensure auctex
+  :config
+  (setq TeX-auto-save t))
+
 (use-package org
   :ensure t
   :config
@@ -80,13 +96,19 @@
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c c") 'org-capture))
 
+(use-package org-journal
+  :ensure t
+  :defer t
+  :custom
+  (org-journal-dir "~/org/journal/")
+  (org-journal-date-format "%A, %d %B %Y"))
 
 (use-package evil
   :ensure t
   :init
-  (setq evil-want-C-i-jump nil) ;cuz C-i and TAB are same in terminal
+  ; (setq evil-want-C-i-jump nil) ;cuz C-i and TAB are same in terminal
   :config 
-  (define-key evil-motion-state-map (kbd "C-c i") 'evil-jump-forward)
+  ; (define-key evil-motion-state-map (kbd "C-c i") 'evil-jump-forward)
   (evil-mode t))
 
 (unless (display-graphic-p)
@@ -133,13 +155,6 @@
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
 ;; (setq evil-want-C-i-jump nil) ;; C-i and TAB are same in terminal
-
-;; Shortcut to edit init.el
-(defun er-find-user-init-file ()
-  "Edit the `user-init-file', in another window."
-  (interactive)
-  (find-file-other-window user-init-file))
-(global-set-key (kbd "C-c I") #'er-find-user-init-file)
 
 (use-package magit
   :ensure t
