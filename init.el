@@ -128,6 +128,11 @@
   :config 
   (evil-commentary-mode t))
 
+(defun find-todo-file ()
+  "Edit the todo.org file, in another window."
+  (interactive)
+  (find-file-other-window (concat org-directory "/todo.org")))
+
 (use-package evil-leader
   :ensure t
   :config
@@ -135,7 +140,10 @@
   (evil-leader/set-key
   "f" 'find-file
   "b" 'switch-to-buffer
-  "w" 'save-buffer)
+  "j" 'org-journal-new-entry
+  "w" 'save-buffer
+  "t" 'find-todo-file
+  "g" 'magit-status)
   (global-evil-leader-mode t))
 
 ;;intialize
@@ -157,7 +165,6 @@
 ;; (setq evil-want-C-i-jump nil) ;; C-i and TAB are same in terminal
 
 (use-package magit
-  :ensure t
-  :config
-  (global-set-key (kbd "C-x g") 'magit-status))
+  :ensure t)
+
 
