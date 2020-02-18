@@ -33,7 +33,11 @@
 (set-frame-font "Fira Code 14" nil t)
 (mac-auto-operator-composition-mode)
 
-;; Shortcut to edit init.el
+;;Yeah, I should really decompose things
+(add-hook 'LaTeX-mode-hook
+	  (lambda () (set (make-local-variable 'TeX-electric-math)
+			  (cons "$" "$"))))
+
 (defun er-find-user-init-file ()
   "Edit the `user-init-file', in another window."
   (interactive)
@@ -139,8 +143,9 @@
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key
   "f" 'find-file
-  "b" 'switch-to-buffer
+  "i" 'er-find-user-init-file
   "j" 'org-journal-new-entry
+  "b" 'switch-to-buffer
   "w" 'save-buffer
   "t" 'find-todo-file
   "g" 'magit-status)
