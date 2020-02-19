@@ -25,15 +25,24 @@
 ;;GENERAL EMACS SETTINGS
 ;; Disable the splash screen (to enable it again, replace the t with 0)
 (setq inhibit-splash-screen t)
-(electric-pair-mode t)
+(electric-pair-mode t) ;;auto-pairs, eg () [] {}
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
-(global-visual-line-mode 1)
+(global-visual-line-mode t)
+
 (set-frame-font "Fira Code 14" nil t)
-(mac-auto-operator-composition-mode)
+;;Fira Code ligatures
+(mac-auto-operator-composition-mode t)
+
+;; TRAMP: disable version control to avoid delays:
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+	      vc-ignore-dir-regexp
+	      tramp-file-name-regexp))
 
 ;;Yeah, I should really decompose things
+;; auto-pair $ with $
 (add-hook 'LaTeX-mode-hook
 	  (lambda () (set (make-local-variable 'TeX-electric-math)
 			  (cons "$" "$"))))
