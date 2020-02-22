@@ -46,12 +46,15 @@
 (add-hook 'LaTeX-mode-hook
 	  (lambda () (set (make-local-variable 'TeX-electric-math)
 			  (cons "$" "$"))))
+(eval-after-load "tex" 
+  '(setcdr (assoc "LaTeX" TeX-command-list)
+	   '("%`%l%(mode) -shell-escape%' %t"
+	     TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")))
 
 (defun er-find-user-init-file ()
-  "Edit the `user-init-file', in another window."
+  "Edit the `user-init-file', in *this* window."
   (interactive)
-  (find-file-other-window user-init-file))
-(global-set-key (kbd "C-c I") #'er-find-user-init-file)
+  (find-file user-init-file))
 
 (when (version<= "26.0.50" emacs-version )
   (global-display-line-numbers-mode))
@@ -142,9 +145,9 @@
   (evil-commentary-mode t))
 
 (defun find-todo-file ()
-  "Edit the todo.org file, in another window."
+  "Edit the todo.org file, in *this* window."
   (interactive)
-  (find-file-other-window (concat org-directory "/todo.org")))
+  (find-file (concat org-directory "/todo.org")))
 
 (use-package evil-leader
   :ensure t
