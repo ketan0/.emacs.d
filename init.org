@@ -1,0 +1,362 @@
+#+TITLE: Emacs configuration file
+#+AUTHOR: Ketan Agrawal
+#+BABEL: :cache yes
+#+LATEX_HEADER: \usepackage{parskip}
+#+LATEX_HEADER: \usepackage{inconsolata}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+PROPERTY: header-args :tangle yes
+
+* Package manager bootstrap
+  #+BEGIN_SRC emacs-lisp
+(require 'package)
+					; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+			 ("org" . "http://orgmode.org/elpa/")
+			 ("marmalade" . "http://marmalade-repo.org/packages/")
+			 ("melpa" . "http://melpa.milkbox.net/packages/")))
+(setq package-enable-at-startup nil)
+(package-initialize)
+
+;; BOOTSTRAP STRAIGHT.EL
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+(straight-use-package 'use-package)
+
+  #+END_SRC
+* Setup
+#+BEGIN_SRC emacs-lisp
+(defun tangle-init ()
+  "If the current buffer is 'init.org' the code-blocks are
+tangled, and the tangled file is compiled."
+  (when (equal (buffer-file-name)
+               (expand-file-name (concat user-emacs-directory "init.org")))
+    ;; Avoid running hooks when tangling.
+    (let ((prog-mode-hook nil))
+      (org-babel-tangle)
+      (byte-compile-file (concat user-emacs-directory "init.el")))))
+
+(add-hook 'after-save-hook 'tangle-init)
+#+END_SRC
+* Sane Defaults
+  Some sane defaults, cribbed from [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]]
+  #+BEGIN_SRC emacs-lisp 
+(setq inhibit-splash-screen t) ;don't show default emacs startup screen
+(setq visible-bell t) ;Instead of shell bell, visual flash
+(electric-pair-mode t) ;;auto-pairs, eg () [] {}
+(when window-system
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tooltip-mode -1))
+(global-visual-line-mode t)
+
+;; These functions are useful. Activate them.
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;; Answering just 'y' or 'n' will do
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; Keep all backup and auto-save files in one directory
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+
+;; UTF-8 please
+(setq locale-coding-system 'utf-8) ; pretty
+(set-terminal-coding-system 'utf-8) ; pretty
+(set-keyboard-coding-system 'utf-8) ; pretty
+(set-selection-coding-system 'utf-8) ; please
+(prefer-coding-system 'utf-8) ; with sugar on top
+
+;; Turn on the blinking cursor
+(blink-cursor-mode t)
+
+(setq-default indent-tabs-mode nil)
+(setq-default indicate-empty-lines t)
+
+;; Don't count two spaces after a period as the end of a sentence.
+;; Just one space is needed.
+(setq sentence-end-double-space nil)
+
+(show-paren-mode t)
+(column-number-mode t)
+
+(setq uniquify-buffer-name-style 'forward)
+
+;; -i gets alias definitions from .bash_profile
+(setq shell-command-switch "-ic")
+  #+END_SRC
+* Appearances
+  Fira Code is a pleasing font.
+  #+BEGIN_SRC emacs-lisp
+(set-frame-font "Fira Code 14" nil t)
+;;Fira Code ligatures
+(if (string-equal system-type "darwin")
+    (mac-auto-operator-composition-mode t))
+  #+END_SRC
+* TODO: categorize this shit lol
+  #+BEGIN_SRC emacs-lisp
+(defun get-string-from-file (filePath)
+  "Return filePath's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(add-hook 'after-make-frame-functions
+	  (lambda (frame)
+	    (if (string-equal system-type "darwin")
+		(do-applescript
+		 (get-string-from-file "~/Documents/rightalign.txt")))))
+
+;; (if (string-equal system-type "darwin")
+;;     (do-applescript
+;;      (get-string-from-file "~/Documents/rightalign.txt")))
+
+
+;; TRAMP: disable version control to avoid delays:
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+	      vc-ignore-dir-regexp
+	      tramp-file-name-regexp))
+
+;;Yeah, I should really decompose things
+;; auto-pair $ with $
+(add-hook 'LaTeX-mode-hook
+	  (lambda () (set (make-local-variable 'TeX-electric-math)
+			  (cons "$" "$"))))
+(eval-after-load "tex" 
+  '(setcdr (assoc "LaTeX" TeX-command-list)
+	   '("%`%l%(mode) -shell-escape%' %t"
+	     TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")))
+
+(defun er-find-user-init-file ()
+  "Edit the `user-init-file', in *this* window."
+  (interactive)
+  (find-file (concat user-emacs-directory "init.org")))
+
+(defun xah-new-empty-buffer ()
+  "Create a new empty buffer.
+New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+
+It returns the buffer (for elisp programing).
+
+URL `http://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
+Version 2017-11-01"
+  (interactive)
+  (let (($buf (generate-new-buffer "untitled")))
+    (switch-to-buffer-other-window $buf)
+    (funcall initial-major-mode)
+    (setq buffer-offer-save t)
+    $buf))
+
+(when (version<= "26.0.50" emacs-version )
+  (global-display-line-numbers-mode))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("de0b7245463d92cba3362ec9fe0142f54d2bf929f971a8cdf33c0bf995250bcf" "c616e584f7268aa3b63d08045a912b50863a34e7ea83e35fcab8537b75741956" "3eb93cd9a0da0f3e86b5d932ac0e3b5f0f50de7a0b805d4eb1f67782e9eb67a4" "b59d7adea7873d58160d368d42828e7ac670340f11f36f67fa8071dbf957236a" default)))
+ '(org-journal-date-format "%A, %d %B %Y")
+ '(org-journal-dir "~/org/journal/")
+ '(org-journal-find-file (quote find-file))
+ '(org-roam-directory "~/org/")
+ '(package-selected-packages
+   (quote
+    (auctex org-journal evil-org use-package evil-surround magit material-theme airline-themes evil-commentary spaceline))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; (use-package gruvbox-theme
+;;   :ensure t
+;;   :config
+;;   (load-theme 'gruvbox-dark-hard t))
+
+(use-package dracula-theme
+  :ensure t
+  :config
+  (load-theme 'dracula t))
+
+(use-package airline-themes
+  :ensure t
+  :config
+  (load-theme 'airline-distinguished))
+
+(use-package tex
+  :defer t
+  :ensure auctex
+  :config
+  (setq TeX-auto-save t))
+
+(use-package mac-pseudo-daemon
+  :straight (mac-pseudo-daemon :type git :host github :repo "DarwinAwardWinner/mac-pseudo-daemon")
+  :config
+  (mac-pseudo-daemon-mode t))
+
+(use-package org
+  :ensure t
+  :config
+  (setq org-log-done t)
+  (setq org-agenda-files (quote ("~/org/todo.org")))
+  (setq org-catch-invisible-edits (quote show-and-error))
+  (setq org-default-notes-file (concat org-directory "/capture.org"))
+
+  ;open links in same window
+  (delete '(file . find-file-other-window) org-link-frame-setup)
+  (add-to-list 'org-link-frame-setup '(file . find-file))
+
+  ;; Make Org mode work with files ending in .org
+  ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+  ;; The above is the default in recent emacsen
+  (global-set-key (kbd "C-c l") 'org-store-link)
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (global-set-key (kbd "C-c c") 'org-capture))
+
+(use-package org-roam
+  :after org
+  :hook 
+  (after-init . org-roam-mode)
+  :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+  :custom
+  (org-roam-directory "~/org/"))
+
+(use-package org-journal
+  :ensure t
+  :defer t
+  :custom
+  (org-journal-find-file 'find-file)
+  (org-journal-dir "~/org/journal/")
+  (org-journal-date-format "%A, %d %B %Y"))
+
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode t))
+
+(use-package helm
+  :ensure t
+  :init
+  (setq helm-completion-style 'emacs)
+  (setq completion-styles '(helm-flex))
+  :config 
+  (helm-mode t)
+  (global-set-key (kbd "M-x") 'helm-M-x))
+
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+  (setq evil-want-keybinding nil)
+ :config 
+  ;; Make evil-mode up/down operate in screen lines instead of logical lines
+  (define-key evil-motion-state-map "j" 'evil-next-visual-line)
+  (define-key evil-motion-state-map "k" 'evil-previous-visual-line)
+  ;; Also in visual mode
+  (define-key evil-visual-state-map "j" 'evil-next-visual-line)
+  (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
+  (evil-mode t))
+
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (evil-collection-init))
+
+(unless (display-graphic-p)
+  (use-package evil-terminal-cursor-changer
+    :ensure t
+    :after evil
+    :init
+    (setq evil-motion-state-cursor 'box)  ; █
+    (setq evil-visual-state-cursor 'box)  ; █
+    (setq evil-normal-state-cursor 'box)  ; █
+    (setq evil-insert-state-cursor 'bar)  ; ⎸
+    (setq evil-emacs-state-cursor  'hbar) ; _
+    :config
+    (etcc-on)))
+
+(use-package evil-commentary
+  :ensure t 
+  :after evil
+  :config 
+  (evil-commentary-mode t))
+
+(defun find-todo-file ()
+  "Edit the todo.org file, in *this* window."
+  (interactive)
+  (find-file (concat org-directory "/todo.org")))
+
+(use-package evil-leader
+  :ensure t
+  :after evil
+  :config
+  (evil-leader/set-leader "<SPC>")
+  (evil-leader/set-key ;active in all modes
+    "<SPC>" 'helm-M-x
+    "b" 'switch-to-buffer
+    "f" 'helm-find-files
+    "g" 'magit-status
+    "i" 'er-find-user-init-file
+    "j" 'org-journal-new-entry
+    "k" 'kill-this-buffer
+    "n" 'switch-to-next-buffer
+    "o" 'xah-new-empty-buffer
+    "p" 'switch-to-prev-buffer
+    "q" 'delete-other-windows
+    "t" 'find-todo-file
+    "w" 'save-buffer)
+  (evil-leader/set-key-for-mode 'org-mode ;just for org-mode, normal state
+    "r i" 'org-roam-insert
+    "r l" 'org-roam
+    "r f" 'org-roam-find-file
+    "r g" 'org-roam-show-graph)
+  ;; (evil-leader/set-key-for-mode 'org-roam-mode ;just for org-roam-mode, normal state
+  (global-evil-leader-mode t))
+
+;;intialize
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :config
+  (global-evil-surround-mode t))
+
+(use-package evil-org
+  :ensure t
+  :after org
+  :config
+  (add-hook 'org-mode-hook 'evil-org-mode)
+  (add-hook 'evil-org-mode-hook
+	    (lambda ()
+	      (evil-org-set-key-theme '(textobjects insert navigation additional shift todo heading))))
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+;; (setq evil-want-C-i-jump nil) ;; C-i and TAB are same in terminal
+
+(use-package magit
+  :ensure t)
+
+(use-package evil-magit
+  :ensure t
+  :after evil
+  :config
+  (evil-magit-init))
+  #+END_SRC
