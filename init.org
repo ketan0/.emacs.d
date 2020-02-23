@@ -6,6 +6,7 @@
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+PROPERTY: header-args :tangle yes
 
+Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][larstvei]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][danielmai]].
 * Setup
 ** Package manager bootstrap
    #+BEGIN_SRC emacs-lisp
@@ -35,7 +36,6 @@
 
    #+END_SRC
 ** Tangle source code
-Thanks to [[https://github.com/larstvei/dot-emacs][larstvei]] for this one
  #+BEGIN_SRC emacs-lisp
    (defun tangle-init ()
      "If the current buffer is 'init.org' the code-blocks are
@@ -349,6 +349,8 @@ Thanks to [[https://github.com/larstvei/dot-emacs][larstvei]] for this one
         (add-hook 'evil-org-mode-hook
                   (lambda ()
                     (evil-org-set-key-theme '(textobjects insert navigation additional shift todo heading))))
+        (define-key evil-normal-state-map (kbd "0") 'evil-beginning-of-line)
+        (define-key evil-normal-state-map (kbd "$") 'evil-end-of-line)
         (require 'evil-org-agenda)
         (evil-org-agenda-set-keys))
       ;; (setq evil-want-C-i-jump nil) ;; C-i and TAB are same in terminal
