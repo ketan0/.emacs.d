@@ -3,24 +3,24 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 (require 'package)
-; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
+					; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                         ("org" . "http://orgmode.org/elpa/")
+			 ("org" . "http://orgmode.org/elpa/")
 			 ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+			 ("melpa" . "http://melpa.milkbox.net/packages/")))
 (setq package-enable-at-startup nil)
 (package-initialize)
 
 ;; BOOTSTRAP STRAIGHT.EL
 (defvar bootstrap-version)
 (let ((bootstrap-file
-        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-      (url-retrieve-synchronously
-        "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-        'silent 'inhibit-cookies)
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -29,18 +29,19 @@
 
 ;; USE-PACKAGE CONFIG
 ;; automatically install use-package if on a fresh system
-; (unless (package-installed-p 'use-package)
-;   (package-refresh-contents)
-;   (package-install 'use-package))
-; (eval-when-compile
-;   ;; Following line is not needed if use-package.el is in ~/.emacs.d
-;   (add-to-list 'load-path "~/.emacs.d/elpa/")
-;   (require 'use-package))
-; ; (setq use-package-always-ensure t)
+					; (unless (package-installed-p 'use-package)
+					;   (package-refresh-contents)
+					;   (package-install 'use-package))
+					; (eval-when-compile
+					;   ;; Following line is not needed if use-package.el is in ~/.emacs.d
+					;   (add-to-list 'load-path "~/.emacs.d/elpa/")
+					;   (require 'use-package))
+					; ; (setq use-package-always-ensure t)
 
 ;;GENERAL EMACS SETTINGS
 ;; Disable the splash screen (to enable it again, replace the t with 0)
-(setq inhibit-splash-screen t)
+(setq inhibit-splash-screen t) ;don't show default emacs startup screen
+(setq visible-bell t) ;Instead of shell bell, visual flash
 (electric-pair-mode t) ;;auto-pairs, eg () [] {}
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -49,7 +50,25 @@
 
 (set-frame-font "Fira Code 14" nil t)
 ;;Fira Code ligatures
-(mac-auto-operator-composition-mode t)
+(if (string-equal system-type "darwin")
+    (mac-auto-operator-composition-mode t))
+
+(defun get-string-from-file (filePath)
+  "Return filePath's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(add-hook 'after-make-frame-functions
+	  (lambda (frame)
+	    (if (string-equal system-type "darwin")
+		(do-applescript
+		 (get-string-from-file "~/Documents/rightalign.txt")))))
+
+;; (if (string-equal system-type "darwin")
+;;     (do-applescript
+;;      (get-string-from-file "~/Documents/rightalign.txt")))
+
 
 ;; TRAMP: disable version control to avoid delays:
 (setq vc-ignore-dir-regexp
@@ -141,20 +160,20 @@ Version 2017-11-01"
   (setq org-agenda-files (quote ("~/org/todo.org")))
   (setq org-catch-invisible-edits (quote show-and-error))
   (setq org-default-notes-file (concat org-directory "/capture.org"))
-;; Make Org mode work with files ending in .org
-;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-;; The above is the default in recent emacsen
+  ;; Make Org mode work with files ending in .org
+  ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+  ;; The above is the default in recent emacsen
   (global-set-key (kbd "C-c l") 'org-store-link)
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c c") 'org-capture))
 
 (use-package org-roam
-      :after org
-      :hook 
-      (after-init . org-roam-mode)
-      :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
-      :custom
-      (org-roam-directory "~/org/"))
+  :after org
+  :hook 
+  (after-init . org-roam-mode)
+  :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+  :custom
+  (org-roam-directory "~/org/"))
 
 (use-package org-journal
   :ensure t
@@ -172,7 +191,7 @@ Version 2017-11-01"
 (use-package evil
   :ensure t
   :init
-  ;(setq evil-want-C-i-jump nil) ;cuz C-i and TAB are same in terminal
+					;(setq evil-want-C-i-jump nil) ;cuz C-i and TAB are same in terminal
   :config 
   ;; Make evil-mode up/down operate in screen lines instead of logical lines
   (define-key evil-motion-state-map "j" 'evil-next-visual-line)
@@ -180,7 +199,7 @@ Version 2017-11-01"
   ;; Also in visual mode
   (define-key evil-visual-state-map "j" 'evil-next-visual-line)
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
-  ; (define-key evil-motion-state-map (kbd "C-c i") 'evil-jump-forward)
+					; (define-key evil-motion-state-map (kbd "C-c i") 'evil-jump-forward)
 
   (evil-mode t))
 
@@ -226,7 +245,7 @@ Version 2017-11-01"
     "n l" 'org-roam
     "n f" 'org-roam-find-file
     "n g" 'org-roam-show-graph)
-  ;; (evil-leader/set-key-for-mode 'org-roam-mode ;just for org-mode, normal state
+  ;; (evil-leader/set-key-for-mode 'org-roam-mode ;just for org-roam-mode, normal state
   (global-evil-leader-mode t))
 
 ;;intialize
@@ -241,7 +260,7 @@ Version 2017-11-01"
   :config
   (add-hook 'org-mode-hook 'evil-org-mode)
   (add-hook 'evil-org-mode-hook
-            (lambda ()
+	    (lambda ()
 	      (evil-org-set-key-theme '(textobjects insert navigation additional shift todo heading))))
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
