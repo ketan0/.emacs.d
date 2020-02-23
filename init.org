@@ -1,4 +1,4 @@
-#+TITLE: Emacs Configuration
+#+TITLE: <~~Emacs Configuration~~>
 #+AUTHOR: Ketan Agrawal
 #+BABEL: :cache yes
 #+LATEX_HEADER: \usepackage{parskip}
@@ -69,7 +69,6 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 #+END_SRC
 * Sane Defaults
   Some sane defaults, cribbed from [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]]
-  cribbed from [file:config.org]
   
   #+BEGIN_SRC emacs-lisp 
     (setq inhibit-splash-screen t) ;don't show default emacs startup screen
