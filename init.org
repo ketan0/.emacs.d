@@ -1,4 +1,4 @@
-#+TITLE: <~~Emacs Configuration~~>
+#+TITLE: <~~emacs config~~>
 #+AUTHOR: Ketan Agrawal
 #+BABEL: :cache yes
 #+LATEX_HEADER: \usepackage{parskip}
@@ -67,8 +67,64 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
                   (do-applescript
                    (get-string-from-file "~/Documents/rightalign.txt")))))
 #+END_SRC
-* Sane Defaults
-  Some sane defaults, cribbed from [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]]
+** Variable customizations
+   See [[file:custom.el][custom.el]] for variables edited via customization buffer.
+   #+BEGIN_SRC emacs-lisp
+     (setq custom-file (concat user-emacs-directory "custom.el"))
+     (load custom-file)
+   #+END_SRC
+** General Convenience
+*** TODO Clean this up, also there's some stuff near evil-leader too
+    #+BEGIN_SRC emacs-lisp
+      (defun er-find-user-init-file ()
+        "Edit the `user-init-file', in *this* window."
+        (interactive)
+        (find-file (concat user-emacs-directory "init.org")))
+
+      (defun xah-new-empty-buffer ()
+        "Create a new empty buffer.
+      New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+
+      It returns the buffer (for elisp programing).
+
+      URL `http://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
+      Version 2017-11-01"
+        (interactive)
+        (let (($buf (generate-new-buffer "untitled")))
+          (switch-to-buffer-other-window $buf)
+          (funcall initial-major-mode)
+          (setq buffer-offer-save t)
+          $buf))
+
+    #+END_SRC 
+* Appearances
+  Fira Code is a pleasing font.
+  #+BEGIN_SRC emacs-lisp
+    (set-frame-font "Fira Code 14" nil t)
+    ;;Fira Code ligatures
+    (if (string-equal system-type "darwin")
+        (mac-auto-operator-composition-mode t))
+    
+  #+END_SRC
+  My current color theme and powerline theme.
+  #+BEGIN_SRC emacs-lisp
+    (use-package gruvbox-theme
+      :ensure t
+      :config
+      (load-theme 'gruvbox-dark-hard t))
+
+    (use-package dracula-theme
+      :ensure t
+      :config
+      (load-theme 'dracula t))
+
+    (use-package airline-themes
+      :ensure t
+      :config
+      (load-theme 'airline-distinguished))
+  #+END_SRC
+* Defaults
+  Some sane defaults, mostly taken from [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]]
   
   #+BEGIN_SRC emacs-lisp 
     (setq inhibit-splash-screen t) ;don't show default emacs startup screen
@@ -118,107 +174,40 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 
     ;; -i gets alias definitions from .bash_profile
     (setq shell-command-switch "-ic")
-  #+END_SRC
-* General Convenience
-** TODO Clean this up, also there's some stuff near evil-leader too
-   #+BEGIN_SRC emacs-lisp
-     (defun er-find-user-init-file ()
-       "Edit the `user-init-file', in *this* window."
-       (interactive)
-       (find-file (concat user-emacs-directory "init.org")))
 
-     (defun xah-new-empty-buffer ()
-       "Create a new empty buffer.
-     New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
-
-     It returns the buffer (for elisp programing).
-
-     URL `http://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
-     Version 2017-11-01"
-       (interactive)
-       (let (($buf (generate-new-buffer "untitled")))
-         (switch-to-buffer-other-window $buf)
-         (funcall initial-major-mode)
-         (setq buffer-offer-save t)
-         $buf))
-
-     (when (version<= "26.0.50" emacs-version )
-       (global-display-line-numbers-mode))
-
-     (custom-set-variables
-      ;; custom-set-variables was added by Custom.
-      ;; If you edit it by hand, you could mess it up, so be careful.
-      ;; Your init file should contain only one such instance.
-      ;; If there is more than one, they won't work right.
-      '(custom-safe-themes
-        (quote
-         ("de0b7245463d92cba3362ec9fe0142f54d2bf929f971a8cdf33c0bf995250bcf" "c616e584f7268aa3b63d08045a912b50863a34e7ea83e35fcab8537b75741956" "3eb93cd9a0da0f3e86b5d932ac0e3b5f0f50de7a0b805d4eb1f67782e9eb67a4" "b59d7adea7873d58160d368d42828e7ac670340f11f36f67fa8071dbf957236a" default)))
-      '(org-journal-date-format "%A, %d %B %Y")
-      '(org-journal-dir "~/org/journal/")
-      '(org-journal-find-file (quote find-file))
-      '(org-roam-directory "~/org/")
-      '(package-selected-packages
-        (quote
-         (auctex org-journal evil-org use-package evil-surround magit material-theme airline-themes evil-commentary spaceline))))
-     (custom-set-faces
-      ;; custom-set-faces was added by Custom.
-      ;; If you edit it by hand, you could mess it up, so be careful.
-      ;; Your init file should contain only one such instance.
-      ;; If there is more than one, they won't work right.
-      )
-
-   #+END_SRC 
-* Appearances
-  Fira Code is a pleasing font.
-  #+BEGIN_SRC emacs-lisp
-    (set-frame-font "Fira Code 14" nil t)
-    ;;Fira Code ligatures
-    (if (string-equal system-type "darwin")
-        (mac-auto-operator-composition-mode t))
-    
-  #+END_SRC
-  My current color theme and powerline theme.
-  #+BEGIN_SRC emacs-lisp
-    (use-package gruvbox-theme
-      :ensure t
-      :config
-      (load-theme 'gruvbox-dark-hard t))
-
-    (use-package dracula-theme
-      :ensure t
-      :config
-      (load-theme 'dracula t))
-
-    (use-package airline-themes
-      :ensure t
-      :config
-      (load-theme 'airline-distinguished))
+    (when (version<= "26.0.50" emacs-version)
+      (global-display-line-numbers-mode))
   #+END_SRC
 * Packages
 ** Org
 *** org
-    #+BEGIN_SRC emacs-lisp
-      (use-package org
-        :ensure t
-        :config
-        (setq org-log-done t)
-        (setq org-src-tab-acts-natively t)
-        (setq org-agenda-files (quote ("~/org/todo.org")))
-        (setq org-catch-invisible-edits (quote show-and-error))
-        (setq org-default-notes-file (concat org-directory "/capture.org"))
+     #+BEGIN_SRC emacs-lisp
+       (use-package org
+         :ensure t
+         :config
+         (setq org-log-done t)
+         (setq org-src-tab-acts-natively t)
+         (setq org-agenda-files '("~/org" "~/.emacs.d/"))
+         (setq org-catch-invisible-edits (quote show-and-error))
+         (setq org-default-notes-file (concat org-directory "/capture.org"))
 
-        ;open links in same window
-        (delete '(file . find-file-other-window) org-link-frame-setup)
-        (add-to-list 'org-link-frame-setup '(file . find-file))
+         ;open links in same window
+         (delete '(file . find-file-other-window) org-link-frame-setup)
+         (add-to-list 'org-link-frame-setup '(file . find-file))
 
-        ;; Make Org mode work with files ending in .org
-        ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-        ;; The above is the default in recent emacsen
-        (global-set-key (kbd "C-c l") 'org-store-link)
-        (global-set-key (kbd "C-c a") 'org-agenda)
-        (global-set-key (kbd "C-c c") 'org-capture))
-    #+END_SRC 
+         ;; Make Org mode work with files ending in .org
+         ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+         ;; The above is the default in recent emacsen
+         (global-set-key (kbd "C-c l") 'org-store-link)
+         (global-set-key (kbd "C-c a") 'org-agenda)
+         (global-set-key (kbd "C-c c") 'org-capture))
+     #+END_SRC 
+**** TODO change the keybindings for capture/agenda/create link/open link
+     DEADLINE: <2020-02-23 Sun>
 *** org-roam
+    :PROPERTIES:
+    :ID:       D2D0F738-E9C0-4A84-B1B5-660BC7B8DB3E
+    :END:
     #+BEGIN_SRC emacs-lisp
       (use-package org-roam
         :after org
@@ -305,6 +294,7 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
         (evil-leader/set-leader "<SPC>")
         (evil-leader/set-key ;active in all modes
           "<SPC>" 'helm-M-x
+          "a" 'org-agenda
           "b" 'switch-to-buffer
           "f" 'helm-find-files
           "g" 'magit-status
@@ -393,13 +383,15 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
                    tramp-file-name-regexp))
    #+END_SRC 
 ** LaTeX
+   See [[file:custom.el][custom.el]] for variables edited via customization buffer.
    #+BEGIN_SRC emacs-lisp
       ;;Yeah, I should really decompose things
       ;; auto-pair $ with $
 
-      (add-hook 'LaTeX-mode-hook
-                (lambda () (set (make-local-variable 'TeX-electric-math)
-                                (cons "$" "$"))))
+      ;; (add-hook 'LaTeX-mode-hook
+      ;;           (lambda () (set (make-local-variable 'TeX-electric-math)
+      ;;                           (cons "$" "$"))))
+ 
       (eval-after-load "tex" 
         '(setcdr (assoc "LaTeX" TeX-command-list)
                  '("%`%l%(mode) -shell-escape%' %t"
