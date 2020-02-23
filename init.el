@@ -183,25 +183,39 @@ Version 2017-11-01"
   (org-journal-dir "~/org/journal/")
   (org-journal-date-format "%A, %d %B %Y"))
 
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode t))
+
 (use-package helm
   :ensure t
+  :init
+  (setq helm-completion-style 'emacs)
+  (setq completion-styles '(helm-flex))
   :config 
-  (helm-mode t))
+  (helm-mode t)
+  (global-set-key (kbd "M-x") 'helm-M-x))
 
 (use-package evil
   :ensure t
   :init
-					;(setq evil-want-C-i-jump nil) ;cuz C-i and TAB are same in terminal
-  :config 
+  (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+  (setq evil-want-keybinding nil)
+ :config 
   ;; Make evil-mode up/down operate in screen lines instead of logical lines
   (define-key evil-motion-state-map "j" 'evil-next-visual-line)
   (define-key evil-motion-state-map "k" 'evil-previous-visual-line)
   ;; Also in visual mode
   (define-key evil-visual-state-map "j" 'evil-next-visual-line)
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
-					; (define-key evil-motion-state-map (kbd "C-c i") 'evil-jump-forward)
-
   (evil-mode t))
+
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
 
 (unless (display-graphic-p)
   (use-package evil-terminal-cursor-changer
@@ -230,11 +244,13 @@ Version 2017-11-01"
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key ;active in all modes
+    "<SPC>" 'helm-M-x
     "b" 'switch-to-buffer
-    "f" 'find-file
+    "f" 'helm-find-files
     "g" 'magit-status
     "i" 'er-find-user-init-file
     "j" 'org-journal-new-entry
+    "k" 'kill-this-buffer
     "o" 'xah-new-empty-buffer
     "p" 'switch-to-prev-buffer
     "q" 'delete-other-windows
