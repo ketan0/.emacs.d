@@ -1,4 +1,4 @@
-#+TITLE: Emacs configuration file
+#+TITLE: Emacs Configuration
 #+AUTHOR: Ketan Agrawal
 #+BABEL: :cache yes
 #+LATEX_HEADER: \usepackage{parskip}
@@ -308,6 +308,7 @@
           "i" 'er-find-user-init-file
           "j" 'org-journal-new-entry
           "k" 'kill-this-buffer
+          "K" 'kill-buffer-and-window
           "n" 'switch-to-next-buffer
           "o" 'xah-new-empty-buffer
           "p" 'switch-to-prev-buffer
