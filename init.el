@@ -212,14 +212,15 @@ Version 2017-11-01"
   (evil-mode t))
 
 (use-package evil-collection
-  :after evil
   :ensure t
+  :after evil
   :config
   (evil-collection-init))
 
 (unless (display-graphic-p)
   (use-package evil-terminal-cursor-changer
     :ensure t
+    :after evil
     :init
     (setq evil-motion-state-cursor 'box)  ; █
     (setq evil-visual-state-cursor 'box)  ; █
@@ -231,6 +232,7 @@ Version 2017-11-01"
 
 (use-package evil-commentary
   :ensure t 
+  :after evil
   :config 
   (evil-commentary-mode t))
 
@@ -241,6 +243,7 @@ Version 2017-11-01"
 
 (use-package evil-leader
   :ensure t
+  :after evil
   :config
   (evil-leader/set-leader "<SPC>")
   (evil-leader/set-key ;active in all modes
@@ -267,6 +270,7 @@ Version 2017-11-01"
 ;;intialize
 (use-package evil-surround
   :ensure t
+  :after evil
   :config
   (global-evil-surround-mode t))
 
@@ -285,4 +289,8 @@ Version 2017-11-01"
 (use-package magit
   :ensure t)
 
-
+(use-package evil-magit
+  :ensure t
+  :after evil
+  :config
+  (evil-magit-init))
