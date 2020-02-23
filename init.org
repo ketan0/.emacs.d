@@ -6,48 +6,67 @@
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+PROPERTY: header-args :tangle yes
 
-* Package manager bootstrap
-  #+BEGIN_SRC emacs-lisp
-(require 'package)
-					; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-			 ("org" . "http://orgmode.org/elpa/")
-			 ("marmalade" . "http://marmalade-repo.org/packages/")
-			 ("melpa" . "http://melpa.milkbox.net/packages/")))
-(setq package-enable-at-startup nil)
-(package-initialize)
-
-;; BOOTSTRAP STRAIGHT.EL
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-(straight-use-package 'use-package)
-
-  #+END_SRC
 * Setup
-#+BEGIN_SRC emacs-lisp
-(defun tangle-init ()
-  "If the current buffer is 'init.org' the code-blocks are
-tangled, and the tangled file is compiled."
-  (when (equal (buffer-file-name)
-               (expand-file-name (concat user-emacs-directory "init.org")))
-    ;; Avoid running hooks when tangling.
-    (let ((prog-mode-hook nil))
-      (org-babel-tangle)
-      (byte-compile-file (concat user-emacs-directory "init.el")))))
+** Package manager bootstrap
+   #+BEGIN_SRC emacs-lisp
+ (require 'package)
+					 ; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
+ (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+			  ("org" . "http://orgmode.org/elpa/")
+			  ("marmalade" . "http://marmalade-repo.org/packages/")
+			  ("melpa" . "http://melpa.milkbox.net/packages/")))
+ (setq package-enable-at-startup nil)
+ (package-initialize)
 
-(add-hook 'after-save-hook 'tangle-init)
+ ;; BOOTSTRAP STRAIGHT.EL
+ (defvar bootstrap-version)
+ (let ((bootstrap-file
+        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (bootstrap-version 5))
+   (unless (file-exists-p bootstrap-file)
+     (with-current-buffer
+	 (url-retrieve-synchronously
+	  "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	  'silent 'inhibit-cookies)
+       (goto-char (point-max))
+       (eval-print-last-sexp)))
+   (load bootstrap-file nil 'nomessage))
+ (straight-use-package 'use-package)
+
+   #+END_SRC
+** Tangle source code
+ #+BEGIN_SRC emacs-lisp
+ (defun tangle-init ()
+   "If the current buffer is 'init.org' the code-blocks are
+ tangled, and the tangled file is compiled."
+   (when (equal (buffer-file-name)
+                (expand-file-name (concat user-emacs-directory "init.org")))
+     ;; Avoid running hooks when tangling.
+     (let ((prog-mode-hook nil))
+       (org-babel-tangle)
+       (message "%s" "heyyyyy")
+       (byte-compile-file (concat user-emacs-directory "init.el")))))
+      
+      
+ (add-hook 'after-save-hook 'tangle-init)
+
+ #+END_SRC
+** Move frame to right half of screen
+#+BEGIN_SRC emacs-lisp
+(defun get-string-from-file (filePath)
+  "Return filePath's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(add-hook 'after-make-frame-functions
+	  (lambda (frame)
+	    (if (string-equal system-type "darwin")
+		(do-applescript
+		 (get-string-from-file "~/Documents/rightalign.txt")))))
 #+END_SRC
 * Sane Defaults
+  
   Some sane defaults, cribbed from [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]]
   #+BEGIN_SRC emacs-lisp 
 (setq inhibit-splash-screen t) ;don't show default emacs startup screen
@@ -105,25 +124,27 @@ tangled, and the tangled file is compiled."
 ;;Fira Code ligatures
 (if (string-equal system-type "darwin")
     (mac-auto-operator-composition-mode t))
+    
   #+END_SRC
-* TODO: categorize this shit lol
+  My current color theme and powerline theme.
   #+BEGIN_SRC emacs-lisp
-(defun get-string-from-file (filePath)
-  "Return filePath's file content."
-  (with-temp-buffer
-    (insert-file-contents filePath)
-    (buffer-string)))
+(use-package gruvbox-theme
+  :ensure t
+  :config
+  (load-theme 'gruvbox-dark-hard t))
 
-(add-hook 'after-make-frame-functions
-	  (lambda (frame)
-	    (if (string-equal system-type "darwin")
-		(do-applescript
-		 (get-string-from-file "~/Documents/rightalign.txt")))))
+(use-package dracula-theme
+  :ensure t
+  :config
+  (load-theme 'dracula t))
 
-;; (if (string-equal system-type "darwin")
-;;     (do-applescript
-;;      (get-string-from-file "~/Documents/rightalign.txt")))
-
+(use-package airline-themes
+  :ensure t
+  :config
+  (load-theme 'airline-distinguished))
+  #+END_SRC
+* Packages
+  #+BEGIN_SRC emacs-lisp
 
 ;; TRAMP: disable version control to avoid delays:
 (setq vc-ignore-dir-regexp
@@ -133,6 +154,7 @@ tangled, and the tangled file is compiled."
 
 ;;Yeah, I should really decompose things
 ;; auto-pair $ with $
+
 (add-hook 'LaTeX-mode-hook
 	  (lambda () (set (make-local-variable 'TeX-electric-math)
 			  (cons "$" "$"))))
@@ -186,20 +208,6 @@ Version 2017-11-01"
  ;; If there is more than one, they won't work right.
  )
 
-;; (use-package gruvbox-theme
-;;   :ensure t
-;;   :config
-;;   (load-theme 'gruvbox-dark-hard t))
-
-(use-package dracula-theme
-  :ensure t
-  :config
-  (load-theme 'dracula t))
-
-(use-package airline-themes
-  :ensure t
-  :config
-  (load-theme 'airline-distinguished))
 
 (use-package tex
   :defer t
