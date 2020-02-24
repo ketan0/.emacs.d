@@ -281,6 +281,7 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 
     #+END_SRC 
 *** evil-leader
+    Syntactic sugar for creating vim-like leader keybindings.
     #+BEGIN_SRC emacs-lisp
       (defun find-todo-file ()
         "Edit the todo.org file, in *this* window."
@@ -298,6 +299,11 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
           "b" 'switch-to-buffer
           "f" 'helm-find-files
           "g" 'magit-status
+          "h k" 'describe-key
+          "h m" 'describe-mode
+          "h o" 'describe-symbol
+          "h v" 'describe-variable
+          "h w" 'where-is
           "i" 'er-find-user-init-file
           "j" 'org-journal-new-entry
           "k" 'kill-this-buffer
@@ -313,6 +319,7 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
           "t" 'find-todo-file
           "w" 'save-buffer)
         (evil-leader/set-key-for-mode 'org-mode ;just for org-mode, normal state
+          "'" 'org-edit-special
           "r i" 'org-roam-insert
           "r l" 'org-roam
           "r f" 'org-roam-find-file
