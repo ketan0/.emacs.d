@@ -202,8 +202,8 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
          (global-set-key (kbd "C-c a") 'org-agenda)
          (global-set-key (kbd "C-c c") 'org-capture))
      #+END_SRC 
-**** TODO change the keybindings for capture/agenda/create link/open link
-     DEADLINE: <2020-02-23 Sun>
+**** DONE change the keybindings for capture/agenda/create link/open link
+     CLOSED: [2020-02-24 Mon 15:24] DEADLINE: <2020-02-23 Sun>
 *** org-roam
     :PROPERTIES:
     :ID:       D2D0F738-E9C0-4A84-B1B5-660BC7B8DB3E
@@ -317,14 +317,18 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
           "s k" 'evil-window-up
           "s l" 'evil-window-right
           "t" 'find-todo-file
-          "w" 'save-buffer)
-        (evil-leader/set-key-for-mode 'org-mode ;just for org-mode, normal state
+          "w" 'save-buffer;)
+        ;; (evil-leader/set-key-for-mode 'org-mode ;just for org-mode, normal state
           "'" 'org-edit-special
+          "r c" 'org-capture
+          "r f" 'org-roam-find-file
+          "r g" 'org-roam-show-graph
           "r i" 'org-roam-insert
           "r l" 'org-roam
-          "r f" 'org-roam-find-file
-          "r g" 'org-roam-show-graph)
-        ;; (evil-leader/set-key-for-mode 'org-roam-mode ;just for org-roam-mode, normal state
+          "r o" 'org-open-at-point)
+        (evil-leader/set-key-for-mode 'LaTeX-mode
+          "c a" 'TeX-command-run-all 
+          "c c" 'TeX-command-master)
         (global-evil-leader-mode t))
     #+END_SRC 
 *** evil-surround
