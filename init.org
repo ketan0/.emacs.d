@@ -182,25 +182,26 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 ** Org
 *** org
      #+BEGIN_SRC emacs-lisp
-       (use-package org
-         :ensure t
-         :config
-         (setq org-log-done t)
-         (setq org-src-tab-acts-natively t)
-         (setq org-agenda-files '("~/org" "~/.emacs.d/"))
-         (setq org-catch-invisible-edits (quote show-and-error))
-         (setq org-default-notes-file (concat org-directory "/capture.org"))
+              (use-package org
+                :ensure t
+                :straight t
+                :config
+                (setq org-log-done t)
+                (setq org-src-tab-acts-natively t)
+                (setq org-agenda-files '("~/org" "~/.emacs.d/"))
+                (setq org-catch-invisible-edits (quote show-and-error))
+                (setq org-default-notes-file (concat org-directory "/capture.org"))
 
-         ;open links in same window
-         (delete '(file . find-file-other-window) org-link-frame-setup)
-         (add-to-list 'org-link-frame-setup '(file . find-file))
+                ;open links in same window
+                (delete '(file . find-file-other-window) org-link-frame-setup)
+                (add-to-list 'org-link-frame-setup '(file . find-file))
 
-         ;; Make Org mode work with files ending in .org
-         ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-         ;; The above is the default in recent emacsen
-         (global-set-key (kbd "C-c l") 'org-store-link)
-         (global-set-key (kbd "C-c a") 'org-agenda)
-         (global-set-key (kbd "C-c c") 'org-capture))
+                ;; Make Org mode work with files ending in .org
+                ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+                ;; The above is the default in recent emacsen
+                (global-set-key (kbd "C-c l") 'org-store-link)
+                (global-set-key (kbd "C-c a") 'org-agenda)
+                (global-set-key (kbd "C-c c") 'org-capture))
      #+END_SRC 
 **** DONE change the keybindings for capture/agenda/create link/open link
      CLOSED: [2020-02-24 Mon 15:24] DEADLINE: <2020-02-23 Sun>
@@ -327,8 +328,9 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
           "r l" 'org-roam
           "r o" 'org-open-at-point)
         (evil-leader/set-key-for-mode 'LaTeX-mode
-          "c a" 'TeX-command-run-all 
-          "c c" 'TeX-command-master)
+          "c a" 'LaTeX-command-run-all 
+          "c c" 'LaTeX-command-master
+          "c e" 'LaTeX-environment)
         (global-evil-leader-mode t))
     #+END_SRC 
 *** evil-surround
