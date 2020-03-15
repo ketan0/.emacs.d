@@ -5,19 +5,21 @@
 #+LATEX_HEADER: \usepackage{inconsolata}
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+PROPERTY: header-args :tangle yes
+^above line tangles code blocks by default
 
-Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][larstvei]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][danielmai]].
+Inspiration for this org-based setup comes from [[https://github.com/larstvei/dot-emacs][larstvei]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][danielmai]].
+
 * Setup
 ** Package manager bootstrap
    #+BEGIN_SRC emacs-lisp
-     (require 'package)
+     ;; (require 'package)
                                              ; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
-     (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                              ("org" . "http://orgmode.org/elpa/")
-                              ("marmalade" . "http://marmalade-repo.org/packages/")
-                              ("melpa" . "http://melpa.milkbox.net/packages/")))
-     (setq package-enable-at-startup nil)
-     (package-initialize)
+     ;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+     ;;                          ("org" . "http://orgmode.org/elpa/")
+     ;;                          ("marmalade" . "http://marmalade-repo.org/packages/")
+     ;;                          ("melpa" . "http://melpa.milkbox.net/packages/")))
+     ;; (setq package-enable-at-startup nil)
+     ;; (package-initialize)
 
      ;; BOOTSTRAP STRAIGHT.EL
      (defvar bootstrap-version)
@@ -33,6 +35,8 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
            (eval-print-last-sexp)))
        (load bootstrap-file nil 'nomessage))
      (straight-use-package 'use-package)
+     (setq straight-use-package-by-default t)
+
 
    #+END_SRC
 ** Tangle source code
@@ -45,7 +49,6 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
        ;; Avoid running hooks when tangling.
        (let ((prog-mode-hook nil))
          (org-babel-tangle)
-         (message "%s" "heyyyyy")
          (byte-compile-file (concat user-emacs-directory "init.el")))))
 
 
@@ -76,6 +79,9 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 ** General Convenience
 *** TODO Clean this up, also there's some stuff near evil-leader too
     #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "A-<backspace>") 'backward-kill-word)
+      (global-set-key (kbd "M-m") 'suspend-frame)
+      (global-set-key (kbd "M-q") 'kill-emacs)
       (defun er-find-user-init-file ()
         "Edit the `user-init-file', in *this* window."
         (interactive)
@@ -108,18 +114,17 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
   #+END_SRC
   My current color theme and powerline theme.
   #+BEGIN_SRC emacs-lisp
-    (use-package gruvbox-theme
-      :ensure t
-      :config
-      (load-theme 'gruvbox-dark-hard t))
+    (use-package gruvbox-theme)
 
-    (use-package dracula-theme
-      :ensure t
-      :config
-      (load-theme 'dracula t))
+    (use-package dracula-theme)
+
+    (use-package bubbleberry-theme)
+
+    (use-package leuven-theme
+      :config 
+      (load-theme 'leuven-dark))
 
     (use-package airline-themes
-      :ensure t
       :config
       (load-theme 'airline-distinguished))
   #+END_SRC
@@ -182,29 +187,68 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 ** Org
 *** org
      #+BEGIN_SRC emacs-lisp
-              (use-package org
-                :ensure t
-                :straight t
-                :config
-                (setq org-log-done t)
-                (setq org-src-tab-acts-natively t)
-                (setq org-agenda-files '("~/org" "~/.emacs.d/"))
-                (setq org-catch-invisible-edits (quote show-and-error))
-                (setq org-default-notes-file (concat org-directory "/capture.org"))
+       ;;______________________________________________________________________
+       ;;;;  Installing Org with straight.el
+       ;;; https://github.com/raxod502/straight.el/blob/develop/README.md#installing-org-with-straightel
+       (require 'subr-x)
+       (use-package 'git)
 
-                ;open links in same window
-                (delete '(file . find-file-other-window) org-link-frame-setup)
-                (add-to-list 'org-link-frame-setup '(file . find-file))
+       (defun org-git-version ()
+         "The Git version of 'org-mode'.
+       Inserted by installing 'org-mode' or when a release is made."
+         (require 'git)
+         (let ((git-repo (expand-file-name
+                          "straight/repos/org/" user-emacs-directory)))
+           (string-trim
+            (git-run "describe"
+                     "--match=release\*"
+                     "--abbrev=6"
+                     "HEAD"))))
 
-                ;; Make Org mode work with files ending in .org
-                ;; (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-                ;; The above is the default in recent emacsen
-                (global-set-key (kbd "C-c l") 'org-store-link)
-                (global-set-key (kbd "C-c a") 'org-agenda)
-                (global-set-key (kbd "C-c c") 'org-capture))
+       (defun org-release ()
+         "The release version of 'org-mode'.
+       Inserted by installing 'org-mode' or when a release is made."
+         (require 'git)
+         (let ((git-repo (expand-file-name
+                          "straight/repos/org/" user-emacs-directory)))
+           (string-trim
+            (string-remove-prefix
+             "release_"
+             (git-run "describe"
+                      "--match=release\*"
+                      "--abbrev=0"
+                      "HEAD")))))
+
+       (provide 'org-version)
+
+       ;; (straight-use-package 'org) ; or org-plus-contrib if desired
+
+       (use-package org
+         :config
+         (setq org-log-done t)
+         (setq org-directory "~/org")
+         (setq org-src-tab-acts-natively t)
+         (setq org-agenda-files '("~/org" "~/.emacs.d/"))
+         (setq org-catch-invisible-edits (quote show-and-error))
+         (setq org-default-notes-file (concat org-directory "/capture.org"))
+         (setq org-capture-templates
+               '(;; other entries
+                 ("t" "todo" entry
+                  (file "~/org/capture.org")
+                  "* TODO %?\n  %i\n  %a")
+                 ("c" "coronavirus" entry (file+datetree 
+                                           "~/org/20200314210447_coronavirus.org")
+                  "* %^{Heading}")
+                 ;; other entries
+                 ))
+         ;;open links in same window
+         (delete '(file . find-file-other-window) org-link-frame-setup)
+         (add-to-list 'org-link-frame-setup '(file . find-file))
+         (global-set-key (kbd "C-c l") 'org-store-link)
+         (global-set-key (kbd "C-c a") 'org-agenda)
+         (global-set-key (kbd "C-c c") 'org-capture))
      #+END_SRC 
-**** DONE change the keybindings for capture/agenda/create link/open link
-     CLOSED: [2020-02-24 Mon 15:24] DEADLINE: <2020-02-23 Sun>
+**** TODO change the keybindings for create link/open link
 *** org-roam
     :PROPERTIES:
     :ID:       D2D0F738-E9C0-4A84-B1B5-660BC7B8DB3E
@@ -221,46 +265,76 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 *** org-journal
     #+BEGIN_SRC emacs-lisp
       (use-package org-journal
-        :ensure t
-        :defer t
         :custom
         (org-journal-find-file 'find-file)
         (org-journal-dir "~/org/journal/")
         (org-journal-date-format "%A, %d %B %Y"))
 
     #+END_SRC 
+*** org-bullets
+    #+BEGIN_SRC emacs-lisp
+      (use-package org-bullets
+        :hook (org-mode . (lambda () (org-bullets-mode t))))
+    #+END_SRC 
 ** Evil
 *** evil
     #+BEGIN_SRC emacs-lisp
       (use-package evil
-        :ensure t
         :init
         (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
         (setq evil-want-keybinding nil)
-       :config 
+        :config 
         ;; Make evil-mode up/down operate in screen lines instead of logical lines
+        (evil-mode t)
         (define-key evil-motion-state-map "j" 'evil-next-visual-line)
         (define-key evil-motion-state-map "k" 'evil-previous-visual-line)
         ;; Also in visual mode
         (define-key evil-visual-state-map "j" 'evil-next-visual-line)
-        (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
-        (evil-mode t))
+        (define-key evil-visual-state-map "k" 'evil-previous-visual-line))
 
     #+END_SRC 
 *** evil-collection
     #+BEGIN_SRC emacs-lisp
       (use-package evil-collection
-        :ensure t
         :after evil
         :config
         (evil-collection-init))
 
     #+END_SRC 
+*** evil-org
+    #+BEGIN_SRC emacs-lisp
+      (use-package evil-org
+        :after org
+        :config
+        (add-hook 'org-mode-hook 'evil-org-mode)
+        (add-hook 'evil-org-mode-hook
+                  (lambda ()
+                    (evil-org-set-key-theme '(textobjects insert navigation additional shift todo heading))))
+        (define-key evil-normal-state-map (kbd "0") 'evil-beginning-of-line)
+        (define-key evil-normal-state-map (kbd "$") 'evil-end-of-line)
+        (require 'evil-org-agenda)
+        (evil-org-agenda-set-keys))
+      ;; (setq evil-want-C-i-jump nil) ;; C-i and TAB are same in terminal
+
+    #+END_SRC 
+*** evil-magit
+    #+BEGIN_SRC emacs-lisp
+      (use-package evil-magit
+        :after evil
+        :config
+        (evil-magit-init))
+    #+END_SRC
+*** evil-visualstar
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package evil-visualstar
+        :config
+        (global-evil-visualstar-mode))
+    #+END_SRC 
 *** evil-terminal-cursor-changer
     #+BEGIN_SRC emacs-lisp
       (unless (display-graphic-p)
         (use-package evil-terminal-cursor-changer
-          :ensure t
           :after evil
           :init
           (setq evil-motion-state-cursor 'box)  ; █
@@ -275,7 +349,6 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 *** evil-commentary
     #+BEGIN_SRC emacs-lisp
       (use-package evil-commentary
-        :ensure t 
         :after evil
         :config 
         (evil-commentary-mode t))
@@ -290,7 +363,6 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
         (find-file (concat org-directory "/todo.org")))
 
       (use-package evil-leader
-        :ensure t
         :after evil
         :config
         (evil-leader/set-leader "<SPC>")
@@ -300,6 +372,7 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
           "b" 'switch-to-buffer
           "f" 'helm-find-files
           "g" 'magit-status
+          "h i" 'info
           "h k" 'describe-key
           "h m" 'describe-mode
           "h o" 'describe-symbol
@@ -336,54 +409,29 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 *** evil-surround
     #+BEGIN_SRC emacs-lisp
       (use-package evil-surround
-        :ensure t
         :after evil
         :config
         (global-evil-surround-mode t))
     #+END_SRC 
-*** evil-org
-    #+BEGIN_SRC emacs-lisp
-      (use-package evil-org
-        :ensure t
-        :after org
-        :config
-        (add-hook 'org-mode-hook 'evil-org-mode)
-        (add-hook 'evil-org-mode-hook
-                  (lambda ()
-                    (evil-org-set-key-theme '(textobjects insert navigation additional shift todo heading))))
-        (define-key evil-normal-state-map (kbd "0") 'evil-beginning-of-line)
-        (define-key evil-normal-state-map (kbd "$") 'evil-end-of-line)
-        (require 'evil-org-agenda)
-        (evil-org-agenda-set-keys))
-      ;; (setq evil-want-C-i-jump nil) ;; C-i and TAB are same in terminal
-
-    #+END_SRC 
-*** evil-magit
-    #+BEGIN_SRC emacs-lisp
-      (use-package evil-magit
-        :ensure t
-        :after evil
-        :config
-        (evil-magit-init))
-    #+END_SRC
 ** helm
    #+BEGIN_SRC emacs-lisp
      (use-package helm
-       :ensure t
        :init
        (setq helm-completion-style 'emacs)
        (setq completion-styles '(helm-flex))
        :config 
-       (helm-mode t)
-       (global-set-key (kbd "M-x") 'helm-M-x))
+  
+       (define-key helm-map (kbd "C-w") 'evil-delete-backward-word)
+       (global-set-key (kbd "M-x") 'helm-M-x)
+       (helm-mode t))
 
    #+END_SRC 
 ** company
    #+BEGIN_SRC emacs-lisp
-     (use-package company
-       :ensure t
-       :config
-       (global-company-mode t))
+          (use-package company
+            :config
+            (define-key company-active-map (kbd "C-w") 'evil-delete-backward-word)
+            (global-company-mode t))
 
    #+END_SRC 
 ** TRAMP
@@ -398,29 +446,18 @@ Inspiration for this setup comes from [[https://github.com/larstvei/dot-emacs][l
 ** LaTeX
    See [[file:custom.el][custom.el]] for variables edited via customization buffer.
    #+BEGIN_SRC emacs-lisp
-      ;;Yeah, I should really decompose things
-      ;; auto-pair $ with $
-
-      ;; (add-hook 'LaTeX-mode-hook
-      ;;           (lambda () (set (make-local-variable 'TeX-electric-math)
-      ;;                           (cons "$" "$"))))
- 
-      (eval-after-load "tex" 
-        '(setcdr (assoc "LaTeX" TeX-command-list)
-                 '("%`%l%(mode) -shell-escape%' %t"
-                   TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")))
-
-     (use-package tex
-        :defer t
-        :ensure auctex
-        :config
-        (setq TeX-auto-save t))
+     (use-package auctex
+       :defer t
+       :config
+       (setq TeX-auto-save t)
+       (setcdr (assoc "LaTeX" TeX-command-list)
+               '("%`%l%(mode) -shell-escape%' %t"
+                 TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")))
 
    #+END_SRC 
 ** magit
    #+BEGIN_SRC emacs-lisp
-     (use-package magit
-       :ensure t)
+     (use-package magit)
 
    #+END_SRC 
 ** mac-pseudo-daemon
