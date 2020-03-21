@@ -12,15 +12,6 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
 * Setup
 ** Package manager bootstrap
    #+BEGIN_SRC emacs-lisp
-     ;; (require 'package)
-                                             ; ;; Any add to list for package-archives (to add marmalade or melpa) goes here
-     ;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-     ;;                          ("org" . "http://orgmode.org/elpa/")
-     ;;                          ("marmalade" . "http://marmalade-repo.org/packages/")
-     ;;                          ("melpa" . "http://melpa.milkbox.net/packages/")))
-     ;; (setq package-enable-at-startup nil)
-     ;; (package-initialize)
-
      ;; BOOTSTRAP STRAIGHT.EL
      (defvar bootstrap-version)
      (let ((bootstrap-file
@@ -73,36 +64,54 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
 ** Variable customizations
    See [[file:custom.el][custom.el]] for variables edited via customization buffer.
    #+BEGIN_SRC emacs-lisp
+     (setq custom-safe-themes t)
      (setq custom-file (concat user-emacs-directory "custom.el"))
      (load custom-file)
    #+END_SRC
-** General Convenience
-*** TODO Clean this up, also there's some stuff near evil-leader too
-    #+BEGIN_SRC emacs-lisp
-      (global-set-key (kbd "A-<backspace>") 'backward-kill-word)
-      (global-set-key (kbd "M-m") 'suspend-frame)
-      (global-set-key (kbd "M-q") 'kill-emacs)
-      (defun er-find-user-init-file ()
-        "Edit the `user-init-file', in *this* window."
-        (interactive)
-        (find-file (concat user-emacs-directory "init.org")))
+* General Convenience
+** TODO Clean this up, also there's some stuff near evil-leader too
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "A-<backspace>") 'backward-kill-word)
+     (global-set-key (kbd "M-m") 'suspend-frame)
+     (global-set-key (kbd "M-q") 'save-buffers-kill-emacs)
+     (global-set-key (kbd "C-M-f") 'toggle-frame-fullscreen)
 
-      (defun xah-new-empty-buffer ()
-        "Create a new empty buffer.
-      New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+     (defun er-find-user-init-file ()
+       "Edit the `user-init-file', in *this* window."
+       (interactive)
+       (find-file (concat user-emacs-directory "init.org")))
 
-      It returns the buffer (for elisp programing).
+     (defun open-dir-in-finder ()
+       "Open a new Finder window to the path of the current buffer"
+       (interactive)
+       (start-process "mai-open-dir-process" nil "open" "."))
 
-      URL `http://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
-      Version 2017-11-01"
-        (interactive)
-        (let (($buf (generate-new-buffer "untitled")))
-          (switch-to-buffer-other-window $buf)
-          (funcall initial-major-mode)
-          (setq buffer-offer-save t)
-          $buf))
+     (defun open-dir-in-iterm ()
+       "Open the current directory of the buffer in iTerm."
+       (interactive)
+       (let* ((iterm-app-path "/Applications/iTerm.app")
+              (iterm-brew-path "/opt/homebrew-cask/Caskroom/iterm2/1.0.0/iTerm.app")
+              (iterm-path (if (file-directory-p iterm-app-path)
+                              iterm-app-path
+                            iterm-brew-path)))
+         (start-process "mai-open-dir-process" nil "open" "-a" iterm-path ".")))
 
-    #+END_SRC 
+     (defun xah-new-empty-buffer ()
+       "Create a new empty buffer.
+          New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+
+          It returns the buffer (for elisp programing).
+
+          URL `http://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
+          Version 2017-11-01"
+       (interactive)
+       (let (($buf (generate-new-buffer "untitled")))
+         (switch-to-buffer-other-window $buf)
+         (funcall initial-major-mode)
+         (setq buffer-offer-save t)
+         $buf))
+
+   #+END_SRC 
 * Appearances
   Fira Code is a pleasing font.
   #+BEGIN_SRC emacs-lisp
@@ -114,19 +123,49 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
   #+END_SRC
   My current color theme and powerline theme.
   #+BEGIN_SRC emacs-lisp
-    (use-package gruvbox-theme)
+    (defun switch-theme (theme)
+      "Disables any currently active themes and loads THEME."
+      ;; This interactive call is taken from `load-theme'
+      (interactive
+       (list
+        (intern (completing-read "Load custom theme: "
+                                 (mapc 'symbol-name
+                                       (custom-available-themes))))))
+      (let ((enabled-themes custom-enabled-themes))
+        (mapc #'disable-theme custom-enabled-themes)
+        (load-theme theme t)
+        (load-theme 'airline-distinguished t)))
 
-    (use-package dracula-theme)
+    (defun disable-active-themes ()
+      "Disables any currently active themes listed in `custom-enabled-themes'."
+      (interactive)
+      (mapc #'disable-theme custom-enabled-themes))
 
-    (use-package bubbleberry-theme)
+    (use-package spacemacs-theme
+      :defer t)
 
     (use-package leuven-theme
-      :config 
-      (load-theme 'leuven-dark))
+      :defer t)
+
+    (use-package constant-theme
+      :defer t)
+
+    (use-package cherry-blossom-theme
+      :defer t)
+
+    (use-package gruvbox-theme
+      :defer t)
+
+    (use-package dracula-theme
+      :defer t)
+
+    (use-package bubbleberry-theme
+      :defer t)
 
     (use-package airline-themes
-      :config
-      (load-theme 'airline-distinguished))
+      :config (load-theme 'airline-distinguished))
+
+
   #+END_SRC
 * Defaults
   Some sane defaults, mostly taken from [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]]
@@ -191,7 +230,7 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
        ;;;;  Installing Org with straight.el
        ;;; https://github.com/raxod502/straight.el/blob/develop/README.md#installing-org-with-straightel
        (require 'subr-x)
-       (use-package 'git)
+       (use-package git)
 
        (defun org-git-version ()
          "The Git version of 'org-mode'.
@@ -227,8 +266,13 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
          :config
          (setq org-log-done t)
          (setq org-directory "~/org")
+
+         (setq org-mobile-inbox-for-pull "~/org/flagged.org")
+
+         (setq org-mobile-directory "~/Dropbox/Apps/Organ/")
+
          (setq org-src-tab-acts-natively t)
-         (setq org-agenda-files '("~/org" "~/.emacs.d/"))
+         (setq org-agenda-files '("~/org/"))
          (setq org-catch-invisible-edits (quote show-and-error))
          (setq org-default-notes-file (concat org-directory "/capture.org"))
          (setq org-capture-templates
@@ -259,8 +303,8 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
         :hook 
         (after-init . org-roam-mode)
         :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
-        :custom
-        (org-roam-directory "~/org/"))
+        :config
+        (setq org-roam-directory "~/org/"))
     #+END_SRC 
 *** org-journal
     #+BEGIN_SRC emacs-lisp
@@ -383,14 +427,18 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
           "k" 'kill-this-buffer
           "K" 'kill-buffer-and-window
           "n" 'switch-to-next-buffer
-          "o" 'xah-new-empty-buffer
+          ;; "o" 'xah-new-empty-buffer
+          "o f" 'open-dir-in-finder
+          "o i" 'open-dir-in-iterm
           "p" 'switch-to-prev-buffer
           "q" 'delete-other-windows
           "s h" 'evil-window-left
           "s j" 'evil-window-down
           "s k" 'evil-window-up
           "s l" 'evil-window-right
-          "t" 'find-todo-file
+          "t l" 'load-theme
+          "t s" 'switch-theme
+          "t d" 'disable-theme
           "w" 'save-buffer;)
         ;; (evil-leader/set-key-for-mode 'org-mode ;just for org-mode, normal state
           "'" 'org-edit-special
