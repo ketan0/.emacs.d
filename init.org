@@ -7,7 +7,7 @@
 #+PROPERTY: header-args :tangle yes
 ^above line tangles code blocks by default
 
-Inspiration for this org-based setup comes from [[https://github.com/larstvei/dot-emacs][larstvei]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][danielmai]].
+Inspirations for this org-based setup comes from [[https://github.com/larstvei/dot-emacs][larstvei]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][danielmai]].
 
 * Setup
 ** Package manager bootstrap
@@ -27,8 +27,6 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
        (load bootstrap-file nil 'nomessage))
      (straight-use-package 'use-package)
      (setq straight-use-package-by-default t)
-
-
    #+END_SRC
 ** Tangle source code
  #+BEGIN_SRC emacs-lisp
@@ -140,6 +138,12 @@ Inspiration for this org-based setup comes from [[https://github.com/larstvei/do
       "Disables any currently active themes listed in `custom-enabled-themes'."
       (interactive)
       (mapc #'disable-theme custom-enabled-themes))
+
+    (use-package cyberpunk-theme
+      :defer t)
+
+    (use-package oldlace-theme
+      :defer t)
 
     (use-package spacemacs-theme
       :defer t)
